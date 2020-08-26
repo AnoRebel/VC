@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="A simple bare minimum concept video conferencing and chatting application">
+  <meta name="title" content="VC">
+  <script>
+    const ROOM_ID = "<%= roomId %>"
+  </script>
+  <!-- FontAwesome 4 CSS -->
+  <!-- <link
+    rel="stylesheet prefetch"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css"
+  /> -->
+  <script defer src="https://kit.fontawesome.com/c939d0e917.js"></script>
+  <!-- Halfmoon CSS -->
+  <link href="https://cdn.jsdelivr.net/gh/halfmoonui/halfmoon@1.0.4/css/halfmoon.min.css" rel="stylesheet" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Halfmoon JS -->
+  <script defer src="https://cdn.jsdelivr.net/gh/halfmoonui/halfmoon@1.0.4/js/halfmoon.min.js"></script>
+  <script defer src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+  <!-- Socket.io JS -->
+  <script src="/socket.io/socket.io.js" defer></script>
+  <!-- Custom JS -->
+  <script src="script.js" defer></script>
+  <title>Clone</title>
+</head>
+  <body data-set-preferred-theme-onload="true">
+  <!-- Page wrapper with .with-sidebar class -->
+  <div class="page-wrapper with-sidebar">
+  <!-- <div class="page-wrapper with-sidebar" data-sidebar-hidden="true"> -->
+    <div class="sticky-alerts"></div>
+    <!-- Sidebar (immediate child of the page wrapper) -->
+    <div class="sidebar">
+      <div class="sidebar-menu">
+        <!-- Sidebar links and titles -->
+        <div class="row justify-content-between">
+          <h5 class="sidebar-title mx-auto">Chat</h5>
+          <div>
+            <button class="btn btn-success" type="button" onclick="toggleSidebar()"><i class="fa fa-arrow-right bar-icon" aria-hidden="true"></i></button>
+            <button class="btn mr-20" type="button" onclick="toggleTheme()"><i class="fa fa-sun-o theme-icon" aria-hidden="true"></i></button>
+            <!-- <i class="fa fa-moon-o" aria-hidden="true"></i> -->
+          </div>
+        </div>
+        <div class="sidebar-divider"></div>
+        <!-- Sidebar content with the search box -->
+        <div class="sidebar-content">
+          <div class="d-flex flex-column h-full vh-80">
+
+          <div id="messages" class="d-flex flex-column flex-grow-1 w-full mh-full">
+            <span id="feedback" class="mx-3 mt-1 text-muted text-monospace"></span>
+          </div>
+          <div id="footer" class="pb-5">
+          <form id="chatform" class="form-inline">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control form-control-lg alt-dm"
+                id="chat-text"
+                name="chat-text"
+                placeholder="Text Message"
+                required
+              />
+              <div class="input-group-append">
+                <button class="btn btn-lg btn-info alt-dm" href="#">
+                  <i class="fa fa-paperclip attachment" aria-hidden="true"></i>
+                </button>
+              <!-- <div class="custom-file">
+                <input type="file" id="multi-file-input" multiple="multiple" accept=".jpg,.png,.gif">
+                <label for="multi-file-input"><i class="fa fa-paperclip attachment" aria-hidden="true"></i></label>
+              </div> -->
+            </div>
+            <div class="input-group-append">
+              <button type="submit" class="btn btn-lg btn-success alt-dm">
+                <i class="fa fa-paper-plane" aria-hidden="true"></i>
+              </button>
+            </div>
+              </div>
+            </form>
+            </div>
+
+        </div>
+          </div>
+        </div>
+    </div>
+    <!-- Content wrapper -->
+    <div class="content-wrapper">
+      <div class="container h-full">
+        <div class="row justify-content-center pt-15">
+          <!-- Toggle sidebar -->
+          <button class="btn btn-lg btn-success mr-5" type="button" onclick="toggleSidebar()"><i class="fa fa-arrow-right bar-icon" aria-hidden="true"></i></button>
+          <button class="btn btn-lg mx-5" type="button" onclick="toggleTheme()"><i class="fa fa-sun-o theme-icon" aria-hidden="true"></i></button>
+          <button class="btn btn-lg btn-danger mx-5" type="button" onclick="toggleSound()"><i class="fas fa-microphone mute"></i></button>
+          <!-- <i class="fas fa-microphone-slash mute"></i> -->
+          <button class="btn btn-lg btn-secondary ml-5" type="button" onclick="toggleVideo()"><i class="fas fa-video stop"></i></button>
+          <!-- <i class="fas fa-video-slash"></i> -->
+        </div>
+        <form id="userform" class="form-inline mt-15 mx-sm-10 mx-md-auto w-sm-full w-lg-half">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control form-control-lg alt-dm"
+                id="username"
+                name="username"
+                placeholder="Enter name to start video streaming:"
+                required
+              />
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-lg btn-success alt-dm">
+                  <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                </button>
+               </div>
+            </div>
+          </form>
+        <div id="video-grid"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
