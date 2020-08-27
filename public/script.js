@@ -10,8 +10,8 @@ const muteIcon = document.querySelector(".mute");
 const stopIcon = document.querySelector(".stop");
 const peer = new Peer(undefined, {
   host: '/',
-  // port: '443',
-  port: '3000',
+  port: '443',
+  // port: '3000',
   path: '/peerjs'
 })
 const peers = {}
@@ -518,8 +518,12 @@ const addNewMessage = (user, message) => {
 
   messages.scrollTo({
     behavior: "smooth",
-    top: document.body.offsetHeight,
+    top: messages.scrollHeight,
   });
+  // messages.scrollTo({
+  //   behavior: "smooth",
+  //   top: document.body.offsetHeight,
+  // });
   // messages.scrollTo({
   //   behavior: "smooth",
   //   top: document.body.offsetTop,
