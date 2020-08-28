@@ -2,6 +2,8 @@
 
 **A simple bare minimum concept video conferencing and chatting application**
 
+### [Demo](https://vc-clone.herokuapp.com): https://vc-clone.herokuapp.com
+
 Made with:
 
  - Nodejs
@@ -35,5 +37,3 @@ or
 	 	`npm start`
 	 		or
 	 	`yarn start`
- 
----
