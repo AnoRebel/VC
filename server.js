@@ -5,7 +5,6 @@ const PORT = process.env.PORT || 3000;
 const botName = "VC";
 
 const start = () => {
-  const cors = require('cors');
   const express = require('express');
   const { ExpressPeerServer } = require('peer');
   const app = express();
@@ -18,8 +17,6 @@ const start = () => {
   app.use(express.static('public'))
 
   app.use('/peerjs', peerServer)
-
-  app.use(cors())
 
   app.get('/', (req, res) => {
     res.redirect(`/${uuid()}`)

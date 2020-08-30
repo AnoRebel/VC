@@ -81,6 +81,7 @@ video {
   max-width: 33rem;
 }
 #messages {
+  height: 90%;
   overflow-y: scroll;
   overflow-x: hidden;
 }

@@ -11,7 +11,6 @@ const stopIcon = document.querySelector(".stop");
 const peer = new Peer(undefined, {
   host: '/',
   port: '443',
-  // port: '3000',
   path: '/peerjs'
 })
 const peers = {}
@@ -26,12 +25,34 @@ themeIcons.forEach(themeIcon => {
     themeIcon.classList.add('fa-sun-o')
   }
 })
+
+// Some browsers partially implement mediaDevices. We can't just assign an object
+// with getUserMedia as it would overwrite existing properties.
+// Here, we will just add the getUserMedia property if it's missing.
+if (navigator.mediaDevices.getUserMedia === undefined) {
+  navigator.mediaDevices.getUserMedia = function(constraints) {
+
+    // First get ahold of the legacy getUserMedia, if present
+    const getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+    // Some browsers just don't implement it - return a rejected promise with an error
+    // to keep a consistent interface
+    if (!getUserMedia) {
+      return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+    }
+
+    // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+    return new Promise((resolve, reject) => {
+      getUserMedia.call(navigator, constraints, resolve, reject);
+    });
+  }
+}
+
 // Get username if stored in browser
 let username = sessionStorage.getItem('username') == undefined ? null : sessionStorage.getItem('username');
 // If username set, start stream
 if (username == null) {
   userform.classList.remove('d-none')
-  // userform.classList.add('d-block')
 } else {
   userform.classList.remove('d-block')
   userform.classList.add('d-none')
@@ -39,14 +60,15 @@ if (username == null) {
   const localContainer = document.createElement('div')
   localContainer.id = "video-container"
   const localVideo = document.createElement('video')
+  localVideo.autoplay = true
+  localVideo.playsinline = true
   localVideo.muted = true
   localVideo.controls = false
   navigator.mediaDevices.getUserMedia({
-    video: true,
+    video: { frameRate: { ideal: 10, max: 15 }},
     audio: true
   }).then(stream => {
     localVideoStream = stream;
-    // addVideoStream(localVideo, stream)
     addVideoStream(localContainer, localVideo, stream)
 
     peer.on('call', call => {
@@ -54,10 +76,11 @@ if (username == null) {
       const remoteContainer = document.createElement('div')
       remoteContainer.id = "video-container"
       const video = document.createElement('video')
+      video.autoplay = true
+      video.playsinline = true
       video.controls = false
       let oncall = true
       call.on('stream', remoteVideoStream => {
-        // addVideoStream(video, remoteVideoStream)
         if (oncall) {
           oncall = false
           addVideoStream(remoteContainer, video, remoteVideoStream)
@@ -68,12 +91,13 @@ if (username == null) {
     socket.on('user-connected', userId => {
       connectToNewUser(userId, stream)
     })
+  }).catch(err => {
+    console.error(err.name + ": " + err.message);
   })
 }
 
 // Typing Indicator shenanigans
 chatform.addEventListener('keyup', event => {
-  // Can use some throttling if load too much
   currentInput = chatform["chat-text"].value
   if (typing){
     socket.emit('chat:typing', username)
@@ -103,7 +127,6 @@ socket.on('chat:not-typing', username => {
 })
 
 socket.on('chat:typing', username => {
-  // feedback.innerHTML = ""
   feedback.innerHTML = `<div class="container-dot">
                             ${username} typing 
                             <span class="dot"></span>
@@ -112,11 +135,6 @@ socket.on('chat:typing', username => {
                           </div>`
 })
 
-// messages.scrollTo({
-//   behavior: "smooth",
-//   top: document.body.offsetTop,
-// });
-
 // Username shenanigans
 userform.addEventListener("submit", event => {
   event.preventDefault();
@@ -124,19 +142,20 @@ userform.addEventListener("submit", event => {
   if (username.toString().trim() === "") return false;
   sessionStorage.setItem('username', username)
   userform.classList.add('d-none')
-  // userform.reset();
+  userform.reset();
 
   const localContainer = document.createElement('div')
   localContainer.id = "video-container"
   const localVideo = document.createElement('video')
+  localVideo.autoplay = true
+  localVideo.playsinline = true
   localVideo.muted = true
   localVideo.controls = false
   navigator.mediaDevices.getUserMedia({
-    video: true,
+    video: { frameRate: { ideal: 10, max: 15 }},
     audio: true
   }).then(stream => {
     localVideoStream = stream;
-    // addVideoStream(localVideo, stream)
     addVideoStream(localContainer, localVideo, stream)
 
     peer.on('call', call => {
@@ -144,10 +163,11 @@ userform.addEventListener("submit", event => {
       const remoteContainer = document.createElement('div')
       remoteContainer.id = "video-container"
       const video = document.createElement('video')
+      video.autoplay = true
+      video.playsinline = true
       video.controls = false
       let oncall = true
       call.on('stream', remoteVideoStream => {
-        // addVideoStream(video, remoteVideoStream)
         if (oncall) {
           oncall = false
           addVideoStream(remoteContainer, video, remoteVideoStream)
@@ -158,32 +178,11 @@ userform.addEventListener("submit", event => {
     socket.on('user-connected', userId => {
       connectToNewUser(userId, stream)
     })
+  }).catch(err => {
+    console.error(err.name + ": " + err.message);
   })
   location.reload()
 });
-
-// const localVideo = document.createElement('video')
-// localVideo.muted = true
-// localVideo.controls = true
-// navigator.mediaDevices.getUserMedia({
-//   video: true,
-//   audio: true
-// }).then(stream => {
-//   localVideoStream = stream;
-//   addVideoStream(localVideo, stream)
-// 
-//   peer.on('call', call => {
-//     call.answer(stream)
-//     const video = document.createElement('video')
-//     call.on('stream', remoteVideoStream => {
-//       addVideoStream(video, remoteVideoStream)
-//     })
-//   })
-// 
-//   socket.on('user-connected', userId => {
-//     connectToNewUser(userId, stream)
-//   })
-// })
 
 // Audio and Video toggle shenanigans
 socket.on('audio:enabled', username => {
@@ -237,20 +236,6 @@ socket.on("chat", ({ user, message }) => {
 });
 
 // Connecting users shenanigans
-// const connectToNewUser = (userId, stream) => {
-//   const call = peer.call(userId, stream)
-//   const video = document.createElement('video')
-//   video.controls = true
-//   video.id = userId
-//   call.on('stream', remoteVideoStream => {
-//     addVideoStream(video, remoteVideoStream)
-//   })
-//   call.on('close', () => {
-//     video.remove()
-//   })
-// 
-//   peers[userId] = call
-// }
 const connectToNewUser = (userId, stream) => {
   const call = peer.call(userId, stream)
   const container = document.createElement('div')
@@ -274,15 +259,14 @@ const connectToNewUser = (userId, stream) => {
 }
 
 // Adding video stream
-// const addVideoStream = (video, stream) => {
-//   video.srcObject = stream;
-//   video.addEventListener('loadedmetadata', () => {
-//     video.play()
-//   })
-//   videoGrid.append(video)
-// }
 const addVideoStream = (container, video, stream) => {
-  video.srcObject = stream;
+  // Older browsers may not have srcObject
+  if ("srcObject" in video) {
+    video.srcObject = stream;
+  } else {
+    // Avoid using this in new browsers, as it is going away.
+    video.src = window.URL.createObjectURL(stream);
+  }
   video.addEventListener('loadedmetadata', () => {
     video.play()
   })
@@ -503,7 +487,6 @@ const toastAlert = (username, type, enabled) => {
 }
 
 const addNewMessage = (user, message) => {
-  // user === data.user ? "You" : data.user;
   let div = document.createElement("div");
   div.classList.add("card", "p-10", "my-5", username === user ? "ml-auto" : "mr-auto");
   div.id = username === user ? "sent" : "recieved";
